@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Entry - BrewView</title>
+</head>
+
+<body>
+    <h1>Add Entry</h1>
+    
+    <form action="/submit_entry" method="post">
+        <label for="pub">Select Pub or Enter New:</label>
+        <input list="pubs" id="pub" name="new_pub">
+        <datalist id="pubs">
+            {% for pub in pubs %}
+                <option value="{{ pub.name }}">{{ pub.name }}</option>
+            {% endfor %}
+        </datalist>
+        
+        <label for="city">Select City or Enter New:</label>
+        <input list="cities" id="city" name="city" required>
+        <datalist id="cities">
+            {% for city in cities %}
+                <option value="{{ city[0] }}">{{ city[0] }}</option>
+            {% endfor %}
+        </datalist>
+        
+        <label for="guinness">Guinness Price (£):</label>
+        <input type="number" step="0.01" id="guinness" name="guinness">
+
+        <label for="tennant">Tennant Price (£):</label>
+        <input type="number" step="0.01" id="tennant" name="tennant">
+
+        <label for="ipa">IPA Price (£):</label>
+        <input type="number" step="0.01" id="ipa" name="ipa">
+        
+        <input type="submit" value="Submit">
+    </form>
+</body>
+
+</html>
+
+{% endblock %}

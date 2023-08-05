@@ -1,0 +1,2 @@
+include brewview/templates/*.html
+include brewview/static/*

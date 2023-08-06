@@ -175,6 +175,23 @@ def index():
     cities = db.session.query(Pub.city).distinct().all()
     return render_template('pages/landing_page.html', cities=cities)
 
+import os
+
+from postmarker.core import PostmarkClient
+
+
+def send_email(to, subject, text_body, html_body):
+    postmark = PostmarkClient(server_token=os.environ.get('POSTMARK_API_TOKEN'))
+    
+    postmark.emails.send(
+        From='a.antoniou@ed.ac.uk',
+        To=to,
+        Subject=subject,
+        HtmlBody=html_body,
+        TextBody=text_body
+    )
+
+
 # Start the app
 if __name__ == '__main__':
     with app.app_context():

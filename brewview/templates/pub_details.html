@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ pub.name }} - BrewView</title>
+</head>
+
+<body>
+    <h1>{{ pub.name }}</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Evidence URL</th>
+                <th>Upvotes</th>
+                <th>Downvotes</th>
+                <th>Current</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in evidence_records %}
+            <tr>
+                <td><a href="{{ record.evidence_url }}" target="_blank">View Evidence</a></td>
+                <td>{{ record.upvotes }}</td>
+                <td>{{ record.downvotes }}</td>
+                <td>{% if record == pub.current_evidence %} Yes {% else %} No {% endif %}</td>
+                <td>
+                    <button onclick="upvote({{ record.id }})">Upvote</button>
+                    <button onclick="downvote({{ record.id }})">Downvote</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        function upvote(evidenceId) {
+            fetch(`/upvote/${evidenceId}`, { method: 'POST' })
+                .then(response => location.reload());
+        }
+
+        function downvote(evidenceId) {
+            fetch(`/downvote/${evidenceId}`, { method: 'POST' })
+                .then(response => location.reload());
+        }
+    </script>
+</body>
+
+</html>

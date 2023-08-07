@@ -38,30 +38,31 @@ BrewPrice.Watch is a web platform where users can view and compare beer prices a
    - Postmark has been chosen as the email service provider.
    - A script has been developed for sending emails through Postmark.
    - Domain `brewprice.watch` has been acquired for the project.
+   - Users can register with a username, email, and password.
+   - Email verification is implemented to ensure the authenticity of the user's email address.
+        If users don't receive the verification email promptly:
+          - They are advised to check their spam/junk folder.
+          - They can request to resend the verification email.
+          - If they made a typo in their email during registration, they are guided to register again.
+          - In case of a delay in receiving the email verification link, users attempting to re-register with the same email are notified, and a new verification link is sent.
 
 ## Next Steps:
 
-1. **Complete Email Verification:**
-   - Generate a unique token for email verification when a new user registers.
-   - Send an email to the user with a link to verify their email.
-   - Create an endpoint to handle email verification and mark the email as verified in the database.
-   - Provide feedback to the user (e.g. "Email verified successfully").
-
-2. **User Roles and Permissions:**
+1. **User Roles and Permissions:**
    - Define user roles (e.g. admin, regular user) and implement permissions (e.g. only admin can approve new pubs).
 
-3. **Adding Entries:**
+2. **Adding Entries:**
    - Implement the functionality for logged-in users to add entries for new pubs and beer prices.
 
-4. **Enhancements and Optimization:**
+3. **Enhancements and Optimization:**
    - Implement error handling and user feedback mechanisms.
    - Ensure mobile responsiveness.
    - Optimize for performance and security.
 
-5. **Deployment:**
+4. **Deployment:**
    - Consider deploying the application on a platform such as Heroku or AWS for public access.
 
-6. **Documentation and Handover:**
+5. **Documentation and Handover:**
    - Write documentation for the code, APIs, and user manual.
    - Handover the project to the maintenance team or the client.
 

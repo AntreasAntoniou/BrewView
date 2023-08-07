@@ -1,15 +1,29 @@
 {% extends 'base.html' %}
+
 {% block content %}
 <!-- brewview/templates/auth/register.html -->
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Register</title>
 </head>
+
 <body>
 
 <h1>Register</h1>
+
+<!-- Display flash messages to the user -->
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class="flashes">
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
 
 <form action="{{ url_for('auth.register') }}" method="post">
     <input type="text" name="username" placeholder="Username" required><br>
@@ -19,6 +33,14 @@
 </form>
 
 <p>Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>.</p>
+
+<p>Didn't receive the verification email?</p>
+<ul>
+    <li>Check your spam/junk folder.</li>
+    <li><a href="{{ url_for('auth.resend_verification') }}">Resend Verification Email</a></li>
+    <li>If you made a typo in your email, you can <a href="{{ url_for('auth.register') }}">register again</a>.</li>
+</ul>
+
 
 </body>
 </html>

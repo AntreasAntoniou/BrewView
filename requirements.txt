@@ -2,3 +2,4 @@ flask
 flask_sqlalchemy
 postmarker
 rich
+fire

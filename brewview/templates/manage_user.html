@@ -1,0 +1,16 @@
+<!-- manage_user.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Manage User: {{ user.username }}</h1>
+
+<form method="POST" action="{{ url_for('manage_user', user_id=user.id) }}">
+    <label for="role">Role:</label>
+    <select name="role" id="role">
+        <option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+        <option value="mod" {% if user.role == 'mod' %}selected{% endif %}>Moderator</option>
+        <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+    </select>
+    <input type="submit" value="Update Role">
+</form>
+{% endblock %}

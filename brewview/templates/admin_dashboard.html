@@ -1,0 +1,25 @@
+<!-- admin_dashboard.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Admin Dashboard</h1>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Role</th>
+        <th>Actions</th>
+    </tr>
+    {% for user in users %}
+        <tr>
+            <td>{{ user.id }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.role }}</td>
+            <td><a href="{{ url_for('manage_user', user_id=user.id) }}">Manage</a></td>
+        </tr>
+    {% endfor %}
+</table>
+{% endblock %}

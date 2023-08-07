@@ -1,102 +1,102 @@
 {% extends 'base.html' %}
+
 {% block content %}
-<!DOCTYPE html>
-<html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BrewView - Monitor Beer Prices</title>
-</head>
+<h1>Welcome to BrewView</h1>
+<p>Select a city to view pub prices:</p>
+<select id="cityDropdown" onchange="fetchPubData()">
+    {% for city in cities %}
+        <option value="{{ city[0] }}" {% if loop.first %}selected{% endif %}>{{ city[0] }}</option>
+    {% endfor %}
+</select>
 
-<body>
-    <h1>Welcome to BrewView</h1>
-    <p>Select a city to view pub prices:</p>
-    <select id="cityDropdown" onchange="fetchPubData()">
-        {% for city in cities %}
-            <option value="{{ city[0] }}" {% if loop.first %}selected{% endif %}>{{ city[0] }}</option>
-        {% endfor %}
-    </select>
+<table id="priceTable">
+    <thead>
+        <tr>
+            <th>Pub Name</th>
+            <th>Guinness Price</th>
+            <th>Tennant Price</th>
+            <th>IPA Price</th>
+            <th>Average Price</th>
+            <th>Score</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
 
-    <table id="priceTable">
-        <thead>
-            <tr>
-                <th>Pub Name</th>
-                <th>Guinness Price</th>
-                <th>Tennant Price</th>
-                <th>IPA Price</th>
-                <th>Average Price</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Pub data will be populated here -->
-        </tbody>
-    </table>
+<button onclick="navigateToAddEntry()">Add New Entry</button>
 
+<script>
+    function fetchPubData() {
+        let city = document.getElementById('cityDropdown').value;
+        fetch(`/fetch_pubs/${city}`)
+            .then(response => response.json())
+            .then(data => {
+                let tableBody = document.getElementById('priceTable').querySelector('tbody');
+                tableBody.innerHTML = '';
     
-    <button onclick="navigateToAddEntry()">Add New Entry</button>
-
-    <script>
-        function fetchPubData() {
-            let city = document.getElementById('cityDropdown').value;
-            fetch(`/fetch_pubs/${city}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                data.forEach(pub => {
+                    let row = tableBody.insertRow();
+    
+                    let nameCell = row.insertCell(0);
+                    let guinnessCell = row.insertCell(1);
+                    let tennantCell = row.insertCell(2);
+                    let ipaCell = row.insertCell(3);
+                    let averageCell = row.insertCell(4);
+                    let scoreCell = row.insertCell(5);
+                    let actionsCell = row.insertCell(6);
+    
+                    nameCell.innerHTML = `<a href="/pub_details/${pub.id}">${pub.name}</a>`;
+    
+                    let guinnessPrice = pub.prices.find(p => p.beer_type === "Guinness");
+                    guinnessCell.textContent = guinnessPrice ? '£' + guinnessPrice.price : 'N/A';
+    
+                    let tennantPrice = pub.prices.find(p => p.beer_type === "Tennant");
+                    tennantCell.textContent = tennantPrice ? '£' + tennantPrice.price : 'N/A';
+    
+                    let ipaPrice = pub.prices.find(p => p.beer_type === "IPA");
+                    ipaCell.textContent = ipaPrice ? '£' + ipaPrice.price : 'N/A';
+    
+                    let sumPrices = pub.prices.reduce((sum, p) => sum + p.price, 0);
+                    averageCell.textContent = (sumPrices / pub.prices.length).toFixed(2);
+    
+                    scoreCell.textContent = pub.score;
+    
+                    let userVote = pub.user_vote;
+                    let upvoteButton = `<button onclick="upvote(${pub.id})" ${userVote === 'upvote' ? 'disabled' : ''}>Upvote</button>`;
+                    let downvoteButton = `<button onclick="downvote(${pub.id})" ${userVote === 'downvote' ? 'disabled' : ''}>Downvote</button>`;
+                    
+                    actionsCell.innerHTML = upvoteButton + downvoteButton + `<button onclick="report(${pub.id})">Report</button>`;
+                    
+                    if (pub.evidence_link) {
+                        actionsCell.innerHTML += `<a href="${pub.evidence_link}" target="_blank">View Evidence</a>`;
                     }
-                    return response.json();
-                })
-                .then(data => {
-                    let tableBody = document.getElementById('priceTable').getElementsByTagName('tbody')[0];
-                    tableBody.innerHTML = '';
-        
-                    data.forEach(pub => {
-                        let row = tableBody.insertRow();
-                        let nameCell = row.insertCell(0);
-                        let guinnessCell = row.insertCell(1);
-                        let tennantCell = row.insertCell(2);
-                        let ipaCell = row.insertCell(3);
-        
-                        nameCell.textContent = pub.name;
-                        guinnessCell.textContent = pub.guinness !== 'N/A' ? '£' + pub.guinness : 'N/A';
-                        tennantCell.textContent = pub.tennant !== 'N/A' ? '£' + pub.tennant : 'N/A';
-                        ipaCell.textContent = pub.ipa !== 'N/A' ? '£' + pub.ipa : 'N/A';
-        
-                        // Calculating the average price for the current pub
-                        let sum = 0;
-                        let count = 0;
-                        if (pub.guinness !== 'N/A') {
-                            sum += pub.guinness;
-                            count++;
-                        }
-                        if (pub.tennant !== 'N/A') {
-                            sum += pub.tennant;
-                            count++;
-                        }
-                        if (pub.ipa !== 'N/A') {
-                            sum += pub.ipa;
-                            count++;
-                        }
-                        let average = count > 0 ? sum / count : 'N/A';
-                        
-                        // Create the average cell at the end of the row
-                        let averageCell = row.insertCell(4);
-                        averageCell.textContent = average !== 'N/A' ? '£' + average.toFixed(2) : 'N/A';
-                    });
-                })
-                .catch(error => {
-                    console.error('There has been a problem with your fetch operation:', error);
                 });
-        }
-        
-        function navigateToAddEntry() {
-            window.location.href = "/add_entry";
-        }
+            });
+    }
+    
+    function upvote(evidenceId) {
+        fetch(`/upvote/${evidenceId}`, { method: 'POST' })
+            .then(response => fetchPubData());
+    }
 
-        fetchPubData();
-    </script>
-</body>
+    function downvote(evidenceId) {
+        fetch(`/downvote/${evidenceId}`, { method: 'POST' })
+            .then(response => fetchPubData());
+    }
 
-</html>
+    function report(evidenceId) {
+        fetch(`/report/${evidenceId}`, { method: 'POST' })
+            .then(response => fetchPubData());
+    }
+
+    function navigateToAddEntry() {
+        window.location.href = "/add_entry";
+    }
+
+    fetchPubData();
+</script>
 
 {% endblock %}

@@ -1,0 +1,332 @@
+===html===
+File: ./brewview/templates/add_entry.html
+Content:
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Entry - BrewView</title>
+</head>
+
+<body>
+    <h1>Add Entry</h1>
+    
+    <form action="/submit_entry" method="post">
+        <label for="pub">Select Pub or Enter New:</label>
+        <input list="pubs" id="pub" name="new_pub">
+        <datalist id="pubs">
+            {% for pub in pubs %}
+                <option value="{{ pub.name }}">{{ pub.name }}</option>
+            {% endfor %}
+        </datalist>
+        
+        <label for="city">Select City or Enter New:</label>
+        <input list="cities" id="city" name="city" required>
+        <datalist id="cities">
+            {% for city in cities %}
+                <option value="{{ city[0] }}">{{ city[0] }}</option>
+            {% endfor %}
+        </datalist>
+        
+        <label for="guinness">Guinness Price (£):</label>
+        <input type="number" step="0.01" id="guinness" name="guinness">
+
+        <label for="tennant">Tennant Price (£):</label>
+        <input type="number" step="0.01" id="tennant" name="tennant">
+
+        <label for="ipa">IPA Price (£):</label>
+        <input type="number" step="0.01" id="ipa" name="ipa">
+        
+        <input type="submit" value="Submit">
+    </form>
+</body>
+
+</html>
+
+{% endblock %}
+
+
+===html===
+File: ./brewview/templates/auth/register.html
+Content:
+{% extends 'base.html' %}
+{% block content %}
+<!-- brewview/templates/auth/register.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register</title>
+</head>
+<body>
+
+<h1>Register</h1>
+
+<form action="{{ url_for('auth.register') }}" method="post">
+    <input type="text" name="username" placeholder="Username" required><br>
+    <input type="email" name="email" placeholder="Email" required><br>
+    <input type="password" name="password" placeholder="Password" required><br>
+    <input type="submit" value="Register">
+</form>
+
+<p>Already have an account? <a href="{{ url_for('auth.login') }}">Log in</a>.</p>
+
+</body>
+</html>
+
+{% endblock %}
+
+===html===
+File: ./brewview/templates/auth/login.html
+Content:
+{% extends 'base.html' %}
+{% block content %}
+<!-- brewview/templates/auth/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+</head>
+<body>
+
+<h1>Login</h1>
+
+<form action="{{ url_for('auth.login') }}" method="post">
+    <input type="email" name="email" placeholder="Email" required><br>
+    <input type="password" name="password" placeholder="Password" required><br>
+    <input type="submit" value="Log in">
+</form>
+
+<p>Don't have an account? <a href="{{ url_for('auth.register') }}">Register</a>.</p>
+
+</body>
+</html>
+
+{% endblock %}
+
+===html===
+File: ./brewview/templates/pages/landing_page.html
+Content:
+{% extends 'base.html' %}
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrewView - Monitor Beer Prices</title>
+</head>
+
+<body>
+    <h1>Welcome to BrewView</h1>
+    <p>Select a city to view pub prices:</p>
+    <select id="cityDropdown" onchange="fetchPubData()">
+        {% for city in cities %}
+            <option value="{{ city[0] }}" {% if loop.first %}selected{% endif %}>{{ city[0] }}</option>
+        {% endfor %}
+    </select>
+
+    <table id="priceTable">
+        <thead>
+            <tr>
+                <th>Pub Name</th>
+                <th>Guinness Price</th>
+                <th>Tennant Price</th>
+                <th>IPA Price</th>
+                <th>Average Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Pub data will be populated here -->
+        </tbody>
+    </table>
+
+    
+    <button onclick="navigateToAddEntry()">Add New Entry</button>
+
+    <script>
+        function fetchPubData() {
+            let city = document.getElementById('cityDropdown').value;
+            fetch(`/fetch_pubs/${city}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    let tableBody = document.getElementById('priceTable').getElementsByTagName('tbody')[0];
+                    tableBody.innerHTML = '';
+        
+                    data.forEach(pub => {
+                        let row = tableBody.insertRow();
+                        let nameCell = row.insertCell(0);
+                        let guinnessCell = row.insertCell(1);
+                        let tennantCell = row.insertCell(2);
+                        let ipaCell = row.insertCell(3);
+        
+                        nameCell.textContent = pub.name;
+                        guinnessCell.textContent = pub.guinness !== 'N/A' ? '£' + pub.guinness : 'N/A';
+                        tennantCell.textContent = pub.tennant !== 'N/A' ? '£' + pub.tennant : 'N/A';
+                        ipaCell.textContent = pub.ipa !== 'N/A' ? '£' + pub.ipa : 'N/A';
+        
+                        // Calculating the average price for the current pub
+                        let sum = 0;
+                        let count = 0;
+                        if (pub.guinness !== 'N/A') {
+                            sum += pub.guinness;
+                            count++;
+                        }
+                        if (pub.tennant !== 'N/A') {
+                            sum += pub.tennant;
+                            count++;
+                        }
+                        if (pub.ipa !== 'N/A') {
+                            sum += pub.ipa;
+                            count++;
+                        }
+                        let average = count > 0 ? sum / count : 'N/A';
+                        
+                        // Create the average cell at the end of the row
+                        let averageCell = row.insertCell(4);
+                        averageCell.textContent = average !== 'N/A' ? '£' + average.toFixed(2) : 'N/A';
+                    });
+                })
+                .catch(error => {
+                    console.error('There has been a problem with your fetch operation:', error);
+                });
+        }
+        
+        function navigateToAddEntry() {
+            window.location.href = "/add_entry";
+        }
+
+        fetchPubData();
+    </script>
+</body>
+
+</html>
+
+{% endblock %}
+
+===python===
+File: ./brewview/scripts/wrap_in_base.py
+Content:
+import os
+
+import fire
+
+
+def wrap_html_with_base(directory_path):
+    base_extends_line = "{% extends 'base.html' %}\n"
+    block_content_start_line = "{% block content %}\n"
+    block_content_end_line = "{% endblock %}\n"
+
+    # Walking through the directory, including subdirectories
+    for foldername, subfolders, filenames in os.walk(directory_path):
+        for filename in filenames:
+            if filename.endswith(".html"):
+                file_path = os.path.join(foldername, filename)
+                with open(file_path, 'r+') as file:
+                    content = file.read()
+
+                    # Check if the file is already wrapped
+                    if base_extends_line.strip() not in content:
+                        # Rewind the file and write the new content
+                        file.seek(0)
+                        file.write(base_extends_line + block_content_start_line + content + block_content_end_line)
+                        file.truncate()
+                print(f"Processed {file_path}")
+
+if __name__ == "__main__":
+    fire.Fire(wrap_html_with_base)
+
+
+===python===
+File: ./brewview/scripts/produce_project_code_file.py
+Content:
+import os
+
+import fire
+
+
+def fetch_and_store_code_files(directory='.', output_dir='output', max_tokens=4000):
+    # Ensure output directory exists
+    os.makedirs(output_dir, exist_ok=True)
+
+    output_file_counter = 1
+    current_token_count = 0
+
+    # Open the first output file
+    output_file = open(f"{output_dir}/output_{output_file_counter}.txt", 'w')
+
+    # Traverse directory recursively
+    for subdir, dirs, files in os.walk(directory):
+        for file in files:
+            filepath = subdir + os.sep + file
+
+            if filepath.endswith((".py", ".html", ".css")):
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    content = f.read()
+
+                tokens = content.split() # split content into tokens
+                
+                # If adding the new tokens would exceed the max token count
+                if current_token_count + len(tokens) > max_tokens:
+                    # Close the current output file
+                    output_file.close()
+                    # Increment the file counter
+                    output_file_counter += 1
+                    # Open a new output file
+                    output_file = open(f"{output_dir}/output_{output_file_counter}.txt", 'w')
+                    # Reset the token count
+                    current_token_count = 0
+
+                # Determine file type
+                if filepath.endswith(".py"):
+                    file_type = "python"
+                elif filepath.endswith(".html"):
+                    file_type = "html"
+                elif filepath.endswith(".css"):
+                    file_type = "css"
+                
+                # Write to output file
+                output_file.write(f"==={file_type}===\n")
+                output_file.write(f"File: {filepath}\n")
+                output_file.write(f"Content:\n{content}\n\n")
+                
+                # Update the token count
+                current_token_count += len(tokens)
+
+    # Close the last output file
+    output_file.close()
+
+if __name__ == "__main__":
+    fire.Fire(fetch_and_store_code_files)
+
+
+===css===
+File: ./brewview/static/css/styles.css
+Content:
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th,
+td {
+    border-bottom: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+

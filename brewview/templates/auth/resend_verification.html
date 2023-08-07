@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Resend Verification Email</h1>
+
+<form action="{{ url_for('auth.resend_verification') }}" method="post">
+    <input type="email" name="email" placeholder="Email" required><br>
+    <input type="submit" value="Resend Verification Email">
+</form>
+
+<p>Go back to <a href="{{ url_for('auth.register') }}">Register</a> or <a href="{{ url_for('auth.login') }}">Login</a></p>
+
+{% endblock %}
